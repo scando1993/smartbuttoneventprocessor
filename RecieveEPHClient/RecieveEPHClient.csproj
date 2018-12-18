@@ -7,11 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.EventHubs" Version="2.2.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\RecieveEPHClient\RecieveEPHClient.csproj" />
+    <PackageReference Include="Microsoft.Azure.EventHubs.Processor" Version="2.2.1" />
   </ItemGroup>
 
 </Project>
