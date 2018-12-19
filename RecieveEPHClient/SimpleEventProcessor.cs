@@ -36,8 +36,8 @@ namespace RecieveEPHClient
 
                 SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
 
-                Console.WriteLine($"Processing {sm.Name} with status {sm.Status}");
-                //Console.WriteLine($"Message received. Partition: '{context.PartitionId}', Data: '{sm.Name}'");
+                Console.WriteLine($"Processing {sm.Data} with status {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
+                //Console.WriteLine($"Message received. Partition: '{context.PartitionId}', Data: '{data}'");
             }
 
             return context.CheckpointAsync();

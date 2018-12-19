@@ -6,9 +6,11 @@ namespace RecieveEPHClient
 {
     public class SmartButton
     {
-        public int Id { get; set; }
-        public int Status { get; set; }
-        public string Name { get; set; } = "";
-        public int IdClient { get; set; }
+        public string DeviceId { get; set; }
+        public int Status { get; set; } //1 Pressed
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string Data { get; set; }
+
     }
 }
