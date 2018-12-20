@@ -11,7 +11,12 @@ namespace SendTestClient
     {
         private static EventHubClient eventHubClient;
         private const string EventHubConnectionString = "Endpoint=sb://iot-button.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=5FolQBU9YxZD5p2oF96Vo623pwv+r+9jPIyn8kqbPm0=";
+
+        //private const string EventHubConnectionString = "Endpoint=sb://ihsuprodbnres010dednamespace.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=mVuc5wXe0aIEcKN9chP29GV7xxOrEhLym9Shz3aNDR0=;";
+
         private const string EventHubName = "eventhubdev";
+
+        //private const string EventHubName = "iothub-ehub-iot-smartb-1102955-43eaefe60e";
 
         static void Main(string[] args)
         {
@@ -49,13 +54,14 @@ namespace SendTestClient
                 {
                     SmartButton sm = new SmartButton
                     {
-                        Id = i,
-                        Name = "Button_" + i,
+                        DeviceId = "" + i,
                         Status = rnd.Next(0, 2),
-                        IdClient = (i + 5) * rnd.Next(100, 201)
+                        Data = "0000",
+                        Latitude =rnd.NextDouble() * 100 + (-10),
+                        Longitude = rnd.NextDouble() * 100 + (-20)
                     };
 
-                    Console.WriteLine($"Button {sm.Id} pressed");
+                    Console.WriteLine($"Button {sm.DeviceId} pressed");
                     string sm_json = JsonConvert.SerializeObject(sm, Formatting.Indented);
                     await eventHubClient.SendAsync(new EventData(Encoding.UTF8.GetBytes(sm_json)));
                 }

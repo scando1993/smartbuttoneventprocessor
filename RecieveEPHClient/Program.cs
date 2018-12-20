@@ -15,15 +15,15 @@ namespace RecieveEPHClient
 
         //var s = createToken("https://iot-button.servicebus.windows.net/eventhubdev/messages", "RootManageSharedAccessKey", "5FolQBU9YxZD5p2oF96Vo623pwv+r+9jPIyn8kqbPm0=");
 
-        //private const string EventHubConnectionString = "Endpoint=sb://iot-button.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=5FolQBU9YxZD5p2oF96Vo623pwv+r+9jPIyn8kqbPm0=";
+        private const string EventHubConnectionString = "Endpoint=sb://iot-button.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=5FolQBU9YxZD5p2oF96Vo623pwv+r+9jPIyn8kqbPm0=";
 
         //Endpoint=sb://ihsuprodbnres010dednamespace.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=mVuc5wXe0aIEcKN9chP29GV7xxOrEhLym9Shz3aNDR0=;EntityPath=iothub-ehub-iot-smartb-1102955-43eaefe60e
 
-        private const string EventHubConnectionString = "Endpoint=sb://ihsuprodbnres010dednamespace.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=mVuc5wXe0aIEcKN9chP29GV7xxOrEhLym9Shz3aNDR0=;";
+        //private const string EventHubConnectionString = "Endpoint=sb://ihsuprodbnres010dednamespace.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=mVuc5wXe0aIEcKN9chP29GV7xxOrEhLym9Shz3aNDR0=;";
 
 
-        //private const string EventHubName = "eventhubdev";
-        private const string EventHubName = "iothub-ehub-iot-smartb-1102955-43eaefe60e";
+        private const string EventHubName = "eventhubdev";
+        //private const string EventHubName = "iothub-ehub-iot-smartb-1102955-43eaefe60e";
 
         //private const string StorageContainerName = "smartbutton";
         private const string StorageContainerName = "smartbutton2";
