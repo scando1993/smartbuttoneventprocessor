@@ -6,6 +6,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.EventHubs" Version="2.2.1" />
     <PackageReference Include="Microsoft.Azure.EventHubs.Processor" Version="2.2.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Twilio" Version="5.24.1" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Settings.job">

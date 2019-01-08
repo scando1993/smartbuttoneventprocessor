@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -32,6 +33,7 @@ namespace RecieveEPHClient
 
         private static readonly string StorageConnectionString = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", StorageAccountName, StorageAccountKey);
 
+        private static ManualResetEvent Wait = new ManualResetEvent(false);
         public static void Main(string[] args)
         {
             MainAsync(args).GetAwaiter().GetResult();
@@ -52,7 +54,7 @@ namespace RecieveEPHClient
             await eventProcessorHost.RegisterEventProcessorAsync<SimpleEventProcessor>();
 
             Console.WriteLine("Receiving. Press ENTER to stop worker.");
-            Console.ReadLine();
+            Wait.WaitOne();
 
             // Disposes of the Event Processor Host
             await eventProcessorHost.UnregisterEventProcessorAsync();
