@@ -9,12 +9,16 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Converters;
 using System.Net.Http;
+using RecieveEPHClient.Model;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace RecieveEPHClient
 {
     class SimpleEventProcessor : IEventProcessor
     {
         private static HttpClient client = new HttpClient();
+        private static SmartButtonContext db = new SmartButtonContext();
         public Task CloseAsync(PartitionContext context, CloseReason reason)
         {
             Console.WriteLine($"Processor Shutting Down. Partition '{context.PartitionId}', Reason: '{reason}'.");
@@ -41,52 +45,81 @@ namespace RecieveEPHClient
                 string data = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
 
                 SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
-                if(sm != null) {
-                    if(checkID(sm.DeviceId)) {
+                if (sm != null)
+                {
+                    var device = getDevice(sm.DeviceId);
+                    if (device != null)
+                    {
                         //Verificar que configuracion tiene
-                        //Enviar mensaje
-                        sendMessage(sm);
-                        //Llamara webhook
-                        //callWebhook("www.google.com", sm);
+                        device.Message = (string.IsNullOrWhiteSpace(device.Message)) ? "Boton presionado" : device.Message;
+                        device.Alias = (string.IsNullOrWhiteSpace(device.Alias)) ? "" : device.Alias;
+                        //if (!string.IsNullOrWhiteSpace(device.Message))
+                        //{
+                            //Enviar mensaje
+                            sendMessage(sm, device);
+
+                            //Llamara webhook
+                            //callWebhook("www.google.com", sm);
+
+                            if (!string.IsNullOrWhiteSpace(device.Webhook))
+                            {
+                            MyButton btn = new MyButton
+                            {
+                                Alias = device.Alias,
+                                Message = device.Message,
+                                Id = device.Id,
+                                State = "pressed",
+                                Dtm = DateTime.Now.ToUniversalTime()
+                            };
+                                callWebhook(device.Webhook, btn);
+                                Console.WriteLine($"Url {device.Webhook}");
+                            }
+                        //}
+
                     }
                 }
-                Console.WriteLine($"Processing. Partition: {context.PartitionId} {sm.Data} with status {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
+                Console.WriteLine($"Procesando. Particion: {context.PartitionId} {sm.Data} .Estado: {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
             }
             return context.CheckpointAsync();
         }
-        private bool checkID(string DeviceId) {
-            if (DeviceId == "42110D") return true;
-            return false;
+        private UserDevices getDevice(string Id)
+        {
+            //var button = await db.UserDevices.Where(device => device.DeviceId == Id).FirstOrDefaultAsync();
+            var button = db.UserDevices.Where(device => device.DeviceId == Id && device.Status == "AVAILABLE").FirstOrDefault();
+            return button;
         }
-        private void callWebhook(string url, SmartButton sm) {
-            
-            var stringContent = new StringContent(JsonConvert.SerializeObject(sm), Encoding.UTF8, "application/json");
+        private void callWebhook(string url, MyButton obj)
+        {
+
+            var stringContent = new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
             var response = client.PostAsync(url, stringContent);
 
         }
 
-        private void sendMessage(SmartButton sm) {
+        private void sendMessage(SmartButton sm, UserDevices device)
+        {
 
             // Find your Account Sid and Token at twilio.com/console
             const string accountSid = "ACf7f52d59e73761f55180118ff12194e8";
             const string authToken = "a9ac53163435a413070eaefdd318e55b";
 
             TwilioClient.Init(accountSid, authToken);
-            string message = "Alerta boton presionado : " + sm.DeviceId;
-            var msg1 = MessageResource.Create(
-                body: message,
-                from: new Twilio.Types.PhoneNumber("+13138256642"),
-                to: new Twilio.Types.PhoneNumber("+593981893287") // kevin
-            );
+            //string message = "Alerta boton presionado : " + sm.DeviceId;
 
-            var msg2 = MessageResource.Create(
-                body: message,
-                from: new Twilio.Types.PhoneNumber("+13138256642"),
-                to: new Twilio.Types.PhoneNumber("+593939379562") // axel
-            );
+            var numbers = JsonConvert.DeserializeObject<List<string>>(device.PhoneNumber);
 
-            Console.WriteLine("Message send to: +593981893287" + msg1.Sid);
-            Console.WriteLine("Message send to: +593939379562" + msg2.Sid);
+            foreach (var n in numbers)
+            {
+                var msg = MessageResource.Create(
+                body: device.Message,
+                from: new Twilio.Types.PhoneNumber("+13138256642"),
+                to: new Twilio.Types.PhoneNumber(n)
+                );
+                Console.WriteLine($"Mensaje enviado a: {n}. Cod: {msg.Sid}. Dispositivo {device.DeviceId}");
+            }
+
+            //Console.WriteLine("Message send to: +593981893287" + msg1.Sid);
+            //Console.WriteLine("Message send to: +593939379562" + msg2.Sid);
 
         }
     }
