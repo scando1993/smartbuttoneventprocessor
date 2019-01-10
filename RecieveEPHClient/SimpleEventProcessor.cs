@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RecieveEPHClient
 {
-    class SimpleEventProcessor : IEventProcessor
+    public class SimpleEventProcessor : IEventProcessor
     {
         private static HttpClient client = new HttpClient();
         private static SmartButtonContext db = new SmartButtonContext();
@@ -53,16 +53,13 @@ namespace RecieveEPHClient
                         //Verificar que configuracion tiene
                         device.Message = (string.IsNullOrWhiteSpace(device.Message)) ? "Boton presionado" : device.Message;
                         device.Alias = (string.IsNullOrWhiteSpace(device.Alias)) ? "" : device.Alias;
-                        //if (!string.IsNullOrWhiteSpace(device.Message))
-                        //{
-                            //Enviar mensaje
-                            sendMessage(sm, device);
 
-                            //Llamara webhook
-                            //callWebhook("www.google.com", sm);
+                        //Enviar mensaje
+                        sendMessage(sm, device);
 
-                            if (!string.IsNullOrWhiteSpace(device.Webhook))
-                            {
+                        //Llamara webhook
+                        if (!string.IsNullOrWhiteSpace(device.Webhook))
+                        {
                             MyButton btn = new MyButton
                             {
                                 Alias = device.Alias,
@@ -71,20 +68,18 @@ namespace RecieveEPHClient
                                 State = "pressed",
                                 Dtm = DateTime.Now.ToUniversalTime()
                             };
-                                callWebhook(device.Webhook, btn);
-                                Console.WriteLine($"Url {device.Webhook}");
-                            }
-                        //}
-
+                            callWebhook(device.Webhook, btn);
+                            Console.WriteLine($"Url {device.Webhook}");
+                        }
                     }
                 }
+                EventProcessor.events += 1;
                 Console.WriteLine($"Procesando. Particion: {context.PartitionId} {sm.Data} .Estado: {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
             }
             return context.CheckpointAsync();
         }
         private UserDevices getDevice(string Id)
         {
-            //var button = await db.UserDevices.Where(device => device.DeviceId == Id).FirstOrDefaultAsync();
             var button = db.UserDevices.Where(device => device.DeviceId == Id && device.Status == "AVAILABLE").FirstOrDefault();
             return button;
         }
@@ -105,8 +100,15 @@ namespace RecieveEPHClient
 
             TwilioClient.Init(accountSid, authToken);
             //string message = "Alerta boton presionado : " + sm.DeviceId;
-
-            var numbers = JsonConvert.DeserializeObject<List<string>>(device.PhoneNumber);
+            var numbers = new List<string>();
+            try
+            {
+                numbers = JsonConvert.DeserializeObject<List<string>>(device.PhoneNumber);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"No se han definido numeros de contacto para {device.DeviceId}");
+            }
 
             foreach (var n in numbers)
             {
@@ -117,9 +119,6 @@ namespace RecieveEPHClient
                 );
                 Console.WriteLine($"Mensaje enviado a: {n}. Cod: {msg.Sid}. Dispositivo {device.DeviceId}");
             }
-
-            //Console.WriteLine("Message send to: +593981893287" + msg1.Sid);
-            //Console.WriteLine("Message send to: +593939379562" + msg2.Sid);
 
         }
     }

@@ -8,32 +8,21 @@ using System.Collections.Generic;
 
 namespace SendTestClient
 {
-    class Program
+    public class SendClient
     {
-        private static List<string> dummyData = new List<string>
-        {
-            "4101C4","41C132","41C20E","41C777","41CCFF","41FF5A","421157","421345","422816","43B23C","43B397","43B42A","43C74E","43C7A0","43C890","43C896","43C959","43CAA8","43CB1B","43CB1F","43CB75","43CD7C","43CD95","43CEF8","43CF18","43CF77","43CF81","43D049","45A01C","45A248"
-        };
-        private static EventHubClient eventHubClient;
+        private EventHubClient eventHubClient;
         private const string EventHubConnectionString = "Endpoint=sb://iot-button.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=5FolQBU9YxZD5p2oF96Vo623pwv+r+9jPIyn8kqbPm0=";
-
-        //private const string EventHubConnectionString = "Endpoint=sb://ihsuprodbnres010dednamespace.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=mVuc5wXe0aIEcKN9chP29GV7xxOrEhLym9Shz3aNDR0=;";
 
         private const string EventHubName = "eventhubdev";
 
-        //private const string EventHubName = "iothub-ehub-iot-smartb-1102955-43eaefe60e";
+        public int mensajesEnviados = 0;
 
-        static void Main(string[] args)
-        {
-            //Console.WriteLine("Hello World!");
-            MainAsync(args).GetAwaiter().GetResult();
-        }
-
-        private static async Task MainAsync(string[] args)
+        public async Task MainAsync(List<string> DummyData)
         {
             // Creates an EventHubsConnectionStringBuilder object from the connection string, and sets the EntityPath.
             // Typically, the connection string should have the entity path in it, but this simple scenario
             // uses the connection string from the namespace.
+
             var connectionStringBuilder = new EventHubsConnectionStringBuilder(EventHubConnectionString)
             {
                 EntityPath = EventHubName
@@ -41,19 +30,17 @@ namespace SendTestClient
 
             eventHubClient = EventHubClient.CreateFromConnectionString(connectionStringBuilder.ToString());
 
-            await SendMessagesToEventHub();
-
+            await SendMessagesToEventHub(DummyData);
             await eventHubClient.CloseAsync();
-
-            Console.WriteLine("Press ENTER to exit.");
-            Console.ReadLine();
+            Console.WriteLine("Mensajes enviados.");
         }
-
-        // Creates an event hub client and sends 100 messages to the event hub.
-        private static async Task SendMessagesToEventHub()
+        
+        // Simulacion envio de mensajes
+        private async Task SendMessagesToEventHub(List<string> DummyData)
         {
             Random rnd = new Random();
-            foreach (var item in dummyData)
+            //Cargar DummyData
+            foreach (var item in DummyData)
             {
                 try
                 {
@@ -74,10 +61,9 @@ namespace SendTestClient
                 {
                     Console.WriteLine($"{DateTime.Now} > Exception: {exception.Message}");
                 }
+                mensajesEnviados++;
             }
-            //await Task.Delay(10);
-
-            Console.WriteLine($"{dummyData.Count} mensajes enviados.");
+            Console.WriteLine($"{mensajesEnviados} mensajes enviados.");
         }
     }
 }

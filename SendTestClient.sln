@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SendTestClient", "SendTestC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecieveEPHClient", "RecieveEPHClient\RecieveEPHClient.csproj", "{AA6CE955-39C8-4AF6-921E-66A3192C4E1B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestSmartButton", "UnitTestSmartButton\UnitTestSmartButton.csproj", "{B55F647C-7712-4DD0-BBC9-0C7830282CB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{AA6CE955-39C8-4AF6-921E-66A3192C4E1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA6CE955-39C8-4AF6-921E-66A3192C4E1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA6CE955-39C8-4AF6-921E-66A3192C4E1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B55F647C-7712-4DD0-BBC9-0C7830282CB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B55F647C-7712-4DD0-BBC9-0C7830282CB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B55F647C-7712-4DD0-BBC9-0C7830282CB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B55F647C-7712-4DD0-BBC9-0C7830282CB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
