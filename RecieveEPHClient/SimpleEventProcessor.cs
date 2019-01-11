@@ -113,9 +113,9 @@ namespace RecieveEPHClient
             foreach (var n in numbers)
             {
                 var msg = MessageResource.Create(
-                body: device.Message,
-                from: new Twilio.Types.PhoneNumber("+13138256642"),
-                to: new Twilio.Types.PhoneNumber(n)
+                    body: $"{device.Alias}:  {device.Message}",
+                    from: new Twilio.Types.PhoneNumber("+13138256642"),
+                    to: new Twilio.Types.PhoneNumber(n)
                 );
                 Console.WriteLine($"Mensaje enviado a: {n}. Cod: {msg.Sid}. Dispositivo {device.DeviceId}");
             }
