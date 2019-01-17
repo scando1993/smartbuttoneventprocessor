@@ -17,8 +17,8 @@ namespace RecieveEPHClient
 {
     public class SimpleEventProcessor : IEventProcessor
     {
-        private static HttpClient client = new HttpClient();
-        private static SmartButtonContext db = new SmartButtonContext();
+        private HttpClient client;
+        private SmartButtonContext db;
         public Task CloseAsync(PartitionContext context, CloseReason reason)
         {
             Console.WriteLine($"Processor Shutting Down. Partition '{context.PartitionId}', Reason: '{reason}'.");
@@ -78,22 +78,23 @@ namespace RecieveEPHClient
             }
             return context.CheckpointAsync();
         }
+
         private UserDevices getDevice(string Id)
         {
+            db = new SmartButtonContext();
             var button = db.UserDevices.Where(device => device.DeviceId == Id && device.Status == "CONFIGURED").FirstOrDefault();
+            db.Dispose();
             return button;
         }
         private void callWebhook(string url, MyButton obj)
         {
-
+            client = new HttpClient();
             var stringContent = new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
             var response = client.PostAsync(url, stringContent);
-
         }
 
         private void sendMessage(SmartButton sm, UserDevices device)
         {
-
             // Find your Account Sid and Token at twilio.com/console
             const string accountSid = "ACf7f52d59e73761f55180118ff12194e8";
             const string authToken = "a9ac53163435a413070eaefdd318e55b";
@@ -117,7 +118,7 @@ namespace RecieveEPHClient
                     from: new Twilio.Types.PhoneNumber("+13138256642"),
                     to: new Twilio.Types.PhoneNumber(n)
                 );
-                Console.WriteLine($"Mensaje enviado a: {n}. Cod: {msg.Sid}. Dispositivo {device.DeviceId}");
+                Console.WriteLine($"Mensaje {device.Message} para: {n}. Cod: {msg.Sid}. Dispositivo {device.DeviceId} con alias: {device.Alias}");
             }
 
         }
