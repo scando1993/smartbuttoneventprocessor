@@ -36,9 +36,9 @@ namespace RecieveEPHClient
             await eventProcessorHost.RegisterEventProcessorAsync<SimpleEventProcessor>();
 
             Console.WriteLine("Receiving data.");
-            if (time == 0) {
-                Wait.WaitOne();
-            }
+            //if (time == 0) {
+            Wait.WaitOne();
+            //}
             System.Threading.Thread.Sleep(time);
             // Disposes of the Event Processor Host
             await eventProcessorHost.UnregisterEventProcessorAsync();

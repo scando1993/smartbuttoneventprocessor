@@ -80,7 +80,7 @@ namespace RecieveEPHClient
         }
         private UserDevices getDevice(string Id)
         {
-            var button = db.UserDevices.Where(device => device.DeviceId == Id && device.Status == "AVAILABLE").FirstOrDefault();
+            var button = db.UserDevices.Where(device => device.DeviceId == Id && device.Status == "CONFIGURED").FirstOrDefault();
             return button;
         }
         private void callWebhook(string url, MyButton obj)
