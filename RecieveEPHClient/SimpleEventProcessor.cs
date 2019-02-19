@@ -20,6 +20,8 @@ namespace RecieveEPHClient
     {
         private HttpClient client;
         private SmartButtonContext db;
+        public string direct_messages_uri = "https://api.twitter.com/1.1/direct_messages/events/new.json";
+
         public Task CloseAsync(PartitionContext context, CloseReason reason)
         {
             Console.WriteLine($"Processor Shutting Down. Partition '{context.PartitionId}', Reason: '{reason}'.");
@@ -45,66 +47,42 @@ namespace RecieveEPHClient
                 //Logica de negocio
                 string data = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
 
-                Console.WriteLine(data);
+                // TODO
+                // Consultar datos de la configuracion del boton
 
+                string userIdRC = "17747093";
+                string userIdKS = "3392698503";
+                string userIdJF = "1084864679757926401";
 
-                SendNotification();
+                string temp = "Hola tu id de twitter es:";
 
-                //@JoseFlo07943435
+                SendNotification(userIdRC, $"{temp} {userIdRC}");
+                SendNotification(userIdKS, $"{temp} {userIdKS}");
+                SendNotification(userIdJF, $"{temp} {userIdJF}");
 
-                //SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
-                //if (sm != null)
-                //{
-                //    var device = getDevice(sm.DeviceId);
-                //    if (device != null)
-                //    {
-                //        //Verificar que configuracion tiene
-                //        device.Message = (string.IsNullOrWhiteSpace(device.Message)) ? "Boton presionado" : device.Message;
-                //        device.Alias = (string.IsNullOrWhiteSpace(device.Alias)) ? "" : device.Alias;
-
-                //        //Enviar mensaje
-                //        sendMessage(sm, device);
-
-                //        //Llamara webhook
-                //        if (!string.IsNullOrWhiteSpace(device.Webhook))
-                //        {
-                //            MyButton btn = new MyButton
-                //            {
-                //                Alias = device.Alias,
-                //                Message = device.Message,
-                //                Id = device.Id,
-                //                State = "pressed",
-                //                Dtm = DateTime.Now.ToUniversalTime()
-                //            };
-                //            callWebhook(device.Webhook, btn);
-                //            Console.WriteLine($"Url {device.Webhook}");
-                //        }
-                //    }
-                //}
-                //EventProcessor.events += 1;
-                //Console.WriteLine($"Procesando. Particion: {context.PartitionId} {sm.Data} .Estado: {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
             }
             return context.CheckpointAsync();
         }
 
-        private void SendNotification()
+        /// <summary>
+        /// Send notification twitter's via
+        /// </summary>
+        /// <param name="userId">Recipient's id</param>
+        /// <param name="Message">Message body</param>
+        /// <returns></returns>
+        private async Task<bool> SendNotification(string userId, string Message)
         {
-            //string username = "@JoseFlo07943435";
             client = new HttpClient();
-            string userIdRC = "17747093";
-            string userIdKS = "3392698503";
-            string userIdJF = "1084864679757926401";
-
-            string direct_messages_uri = "https://api.twitter.com/1.1/direct_messages/events/new.json";
 
             string AuthHeader = ProjectComponent.GenerateTwitterAuthHeader(direct_messages_uri); client.DefaultRequestHeaders.Add("Authorization", AuthHeader); client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            string json = ProjectComponent.ParseJson(userIdRC, "hola eventhub");
-            var response = client.PostAsync(direct_messages_uri, new StringContent(json, Encoding.UTF8, "application/json"));
+            string json = ProjectComponent.ParseJson(userId, Message);
+            var response = client.PostAsync(direct_messages_uri, new StringContent(json, Encoding.UTF8, "application/json")).GetAwaiter().GetResult();
+            
+            Console.WriteLine($"It was send: {response.IsSuccessStatusCode}, userId: {userId}, message: {Message}");
 
-            Console.WriteLine(response.Status);
+            return response.IsSuccessStatusCode;
         }
-
 
         public async Task<string> SendReplyResponse(string Text, string ReplyToStatusId, string ReplyToUserId)
         {
@@ -163,49 +141,5 @@ namespace RecieveEPHClient
 
         }
 
-        private UserDevices getDevice(string Id)
-        {
-            db = new SmartButtonContext();
-            var button = db.UserDevices.Where(device => device.DeviceId == Id && device.Status == "CONFIGURED").FirstOrDefault();
-            db.Dispose();
-            return button;
-        }
-
-        private void callWebhook(string url, MyButton obj)
-        {
-            client = new HttpClient();
-            var stringContent = new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
-            var response = client.PostAsync(url, stringContent);
-        }
-
-        private void sendMessage(SmartButton sm, UserDevices device)
-        {
-            // Find your Account Sid and Token at twilio.com/console
-            const string accountSid = "ACf7f52d59e73761f55180118ff12194e8";
-            const string authToken = "a9ac53163435a413070eaefdd318e55b";
-
-            TwilioClient.Init(accountSid, authToken);
-            //string message = "Alerta boton presionado : " + sm.DeviceId;
-            var numbers = new List<string>();
-            try
-            {
-                numbers = JsonConvert.DeserializeObject<List<string>>(device.PhoneNumber);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"No se han definido numeros de contacto para {device.DeviceId}");
-            }
-
-            foreach (var n in numbers)
-            {
-                var msg = MessageResource.Create(
-                    body: $"{device.Alias}:  {device.Message}",
-                    from: new Twilio.Types.PhoneNumber("+13138256642"),
-                    to: new Twilio.Types.PhoneNumber(n)
-                );
-                Console.WriteLine($"Mensaje {device.Message} para: {n}. Cod: {msg.Sid}. Dispositivo {device.DeviceId} con alias: {device.Alias}");
-            }
-
-        }
     }
 }
