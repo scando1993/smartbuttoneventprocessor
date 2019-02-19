@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SendTestClient", "SendTestC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecieveEPHClient", "RecieveEPHClient\RecieveEPHClient.csproj", "{AA6CE955-39C8-4AF6-921E-66A3192C4E1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestSmartButton", "UnitTestSmartButton\UnitTestSmartButton.csproj", "{B55F647C-7712-4DD0-BBC9-0C7830282CB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTestSmartButton", "UnitTestSmartButton\UnitTestSmartButton.csproj", "{B55F647C-7712-4DD0-BBC9-0C7830282CB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
