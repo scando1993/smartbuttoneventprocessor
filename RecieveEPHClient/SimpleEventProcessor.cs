@@ -12,6 +12,7 @@ using System.Net.Http;
 using RecieveEPHClient.Model;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
 
 namespace RecieveEPHClient
 {
@@ -44,39 +45,122 @@ namespace RecieveEPHClient
                 //Logica de negocio
                 string data = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
 
-                SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
-                if (sm != null)
-                {
-                    var device = getDevice(sm.DeviceId);
-                    if (device != null)
-                    {
-                        //Verificar que configuracion tiene
-                        device.Message = (string.IsNullOrWhiteSpace(device.Message)) ? "Boton presionado" : device.Message;
-                        device.Alias = (string.IsNullOrWhiteSpace(device.Alias)) ? "" : device.Alias;
+                Console.WriteLine(data);
 
-                        //Enviar mensaje
-                        sendMessage(sm, device);
 
-                        //Llamara webhook
-                        if (!string.IsNullOrWhiteSpace(device.Webhook))
-                        {
-                            MyButton btn = new MyButton
-                            {
-                                Alias = device.Alias,
-                                Message = device.Message,
-                                Id = device.Id,
-                                State = "pressed",
-                                Dtm = DateTime.Now.ToUniversalTime()
-                            };
-                            callWebhook(device.Webhook, btn);
-                            Console.WriteLine($"Url {device.Webhook}");
-                        }
-                    }
-                }
-                EventProcessor.events += 1;
-                Console.WriteLine($"Procesando. Particion: {context.PartitionId} {sm.Data} .Estado: {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
+                SendNotification();
+
+                //@JoseFlo07943435
+
+                //SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
+                //if (sm != null)
+                //{
+                //    var device = getDevice(sm.DeviceId);
+                //    if (device != null)
+                //    {
+                //        //Verificar que configuracion tiene
+                //        device.Message = (string.IsNullOrWhiteSpace(device.Message)) ? "Boton presionado" : device.Message;
+                //        device.Alias = (string.IsNullOrWhiteSpace(device.Alias)) ? "" : device.Alias;
+
+                //        //Enviar mensaje
+                //        sendMessage(sm, device);
+
+                //        //Llamara webhook
+                //        if (!string.IsNullOrWhiteSpace(device.Webhook))
+                //        {
+                //            MyButton btn = new MyButton
+                //            {
+                //                Alias = device.Alias,
+                //                Message = device.Message,
+                //                Id = device.Id,
+                //                State = "pressed",
+                //                Dtm = DateTime.Now.ToUniversalTime()
+                //            };
+                //            callWebhook(device.Webhook, btn);
+                //            Console.WriteLine($"Url {device.Webhook}");
+                //        }
+                //    }
+                //}
+                //EventProcessor.events += 1;
+                //Console.WriteLine($"Procesando. Particion: {context.PartitionId} {sm.Data} .Estado: {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
             }
             return context.CheckpointAsync();
+        }
+
+        private void SendNotification()
+        {
+            //string username = "@JoseFlo07943435";
+            client = new HttpClient();
+            string userIdRC = "17747093";
+            string userIdKS = "3392698503";
+            string userIdJF = "1084864679757926401";
+
+            string direct_messages_uri = "https://api.twitter.com/1.1/direct_messages/events/new.json";
+
+            string AuthHeader = ProjectComponent.GenerateTwitterAuthHeader(direct_messages_uri); client.DefaultRequestHeaders.Add("Authorization", AuthHeader); client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            string json = ProjectComponent.ParseJson(userIdRC, "hola eventhub");
+            var response = client.PostAsync(direct_messages_uri, new StringContent(json, Encoding.UTF8, "application/json"));
+
+            Console.WriteLine(response.Status);
+        }
+
+
+        public async Task<string> SendReplyResponse(string Text, string ReplyToStatusId, string ReplyToUserId)
+        {
+            OAuthInfo OAI = new OAuthInfo()
+            {
+                ConsumerKey = Properties.Resources.TwConsumerKey,
+                ConsumerSecret = Properties.Resources.TwConsumerSecret,
+                AccessToken = Properties.Resources.TwToken,
+                AccessSecret = Properties.Resources.TwTokenSecret
+            };
+
+            TinyTwitter TT = new TinyTwitter(OAI);
+            TT.ReplyStatus(Text, ReplyToStatusId, ReplyToUserId);
+            return "OK";
+        }
+
+        public async Task<bool> CheckFriendship(string BotScreenName, string RecipientUsername)
+        {
+            bool IsFriend = false;
+            OAuthInfo OAI = new OAuthInfo()
+            {
+                ConsumerKey = Properties.Resources.TwConsumerKey,
+                ConsumerSecret = Properties.Resources.TwConsumerSecret,
+                AccessToken = Properties.Resources.TwToken,
+                AccessSecret = Properties.Resources.TwTokenSecret
+            };
+
+            TinyTwitter TT = new TinyTwitter(OAI);
+
+            string CheckFriendJson = TT.CheckFriendship(BotScreenName, RecipientUsername);
+
+            CheckFriendship CF = (CheckFriendship)Newtonsoft.Json.JsonConvert.DeserializeObject(CheckFriendJson, typeof(CheckFriendship));
+
+            if (CF != null)
+
+            {
+                IsFriend = CF.Relationship.Source.Following;
+
+            }
+            return IsFriend;
+        }
+
+        private async Task<string> FollowUserId(string UserId)
+        {
+            bool IsFriend = false;
+            OAuthInfo OAI = new OAuthInfo()
+            {
+                ConsumerKey = Properties.Resources.TwConsumerKey,
+                ConsumerSecret = Properties.Resources.TwConsumerSecret,
+                AccessToken = Properties.Resources.TwToken,
+                AccessSecret = Properties.Resources.TwTokenSecret
+            };
+            TinyTwitter TT = new TinyTwitter(OAI);
+            TT.FollowUserId(UserId);
+            return "OK";
+
         }
 
         private UserDevices getDevice(string Id)
@@ -86,6 +170,7 @@ namespace RecieveEPHClient
             db.Dispose();
             return button;
         }
+
         private void callWebhook(string url, MyButton obj)
         {
             client = new HttpClient();
