@@ -12,7 +12,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="Twilio" Version="5.24.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System">

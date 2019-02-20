@@ -12,4 +12,11 @@ namespace RecieveEPHClient.Model
         public string State { get; set; }
         public DateTime Dtm { get; set; }
     }
+
+    class TwitterAccount
+    {
+        public string Id { get; set; }
+        public string Username { get; set; }
+
+    }
 }
