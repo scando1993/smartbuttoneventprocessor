@@ -56,8 +56,12 @@ namespace RecieveEPHClient
                 SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
                 if (sm != null)
                 {
+<<<<<<< HEAD
                     UserDevices device = getDevice(sm.DeviceId);
 >>>>>>> Envio de notificacion con los datos configurados
+=======
+                    var device = getDevice(sm.DeviceId);
+>>>>>>> tipo de dato dinamico
                     if (device != null)
                     {
                         //Verificar que configuracion tiene
