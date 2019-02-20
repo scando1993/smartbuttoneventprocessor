@@ -47,7 +47,7 @@ namespace RecieveEPHClient
                 SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
                 if (sm != null)
                 {
-                    UserDevices device = getDevice(sm.DeviceId);
+                    var device = getDevice(sm.DeviceId);
                     if (device != null)
                     {
                         //Verificar que configuracion tiene
