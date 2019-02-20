@@ -5,9 +5,6 @@ using Microsoft.Azure.EventHubs;
 using Microsoft.Azure.EventHubs.Processor;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Twilio;
-using Twilio.Rest.Api.V2010.Account;
-using Twilio.Converters;
 using System.Net.Http;
 using RecieveEPHClient.Model;
 using System.Linq;
@@ -47,18 +44,34 @@ namespace RecieveEPHClient
                 //Logica de negocio
                 string data = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
 
-                // TODO
-                // Consultar datos de la configuracion del boton
+                SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
+                if (sm != null)
+                {
+                    UserDevices device = getDevice(sm.DeviceId);
+                    if (device != null)
+                    {
+                        //Verificar que configuracion tiene
+                        device.Message = (string.IsNullOrWhiteSpace(device.Message)) ? "Boton presionado" : device.Message;
+                        device.Alias = (string.IsNullOrWhiteSpace(device.Alias)) ? "" : device.Alias;
 
-                string userIdRC = "17747093";
-                string userIdKS = "3392698503";
-                string userIdJF = "1084864679757926401";
+                        //Enviar Notificacion por Twitter
 
-                string temp = "Hola tu id de twitter es:";
+                        //[{"Id":"1084864679757926400","Username":"JoseFlo07943435"},{"Id":"17747093","Username":"rt10runner"}, {"Id":"3392698503", "Username":"ksantacr_"}]
+                        try
+                        {
+                            List<TwitterAccount> accounts = JsonConvert.DeserializeObject<List<TwitterAccount>>(device.TwitterAccount);
 
-                SendNotification(userIdRC, $"{temp} {userIdRC}");
-                SendNotification(userIdKS, $"{temp} {userIdKS}");
-                SendNotification(userIdJF, $"{temp} {userIdJF}");
+                            foreach (TwitterAccount account in accounts)
+                            {
+                                SendNotification(account.Id, $"{device.Alias}: {device.Message} \n@{account.Username}");
+                            }
+                        }
+                        catch {
+                            Console.WriteLine($"No se han definido usuarios en el device: {device.DeviceId}");
+                        }
+
+                    }
+                }
 
             }
             return context.CheckpointAsync();
@@ -84,7 +97,15 @@ namespace RecieveEPHClient
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<string> SendReplyResponse(string Text, string ReplyToStatusId, string ReplyToUserId)
+        private UserDevices getDevice(string Id)
+        {
+            db = new SmartButtonContext();
+            var button = db.UserDevices.Where(device => device.DeviceId == Id && device.Status == "CONFIGURED").FirstOrDefault();
+            db.Dispose();
+            return button;
+        }
+
+        private async Task<string> SendReplyResponse(string Text, string ReplyToStatusId, string ReplyToUserId)
         {
             OAuthInfo OAI = new OAuthInfo()
             {
@@ -99,7 +120,7 @@ namespace RecieveEPHClient
             return "OK";
         }
 
-        public async Task<bool> CheckFriendship(string BotScreenName, string RecipientUsername)
+        private async Task<bool> CheckFriendship(string BotScreenName, string RecipientUsername)
         {
             bool IsFriend = false;
             OAuthInfo OAI = new OAuthInfo()

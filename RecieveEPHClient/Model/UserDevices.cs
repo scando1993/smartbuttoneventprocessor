@@ -19,5 +19,6 @@ namespace RecieveEPHClient.Model
         public string CreatedBy { get; set; }
         public string ModicatedBy { get; set; }
         public DateTime? ModificationDtm { get; set; }
+        public string TwitterAccount { get; set; }
     }
 }
