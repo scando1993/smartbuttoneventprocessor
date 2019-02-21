@@ -47,7 +47,7 @@ namespace RecieveEPHClient
                 SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
                 if (sm != null)
                 {
-                    var device = getDevice(sm.DeviceId);
+                    UserDevices device = getDevice(sm.DeviceId);
                     if (device != null)
                     {
                         //Verificar que configuracion tiene
@@ -61,9 +61,11 @@ namespace RecieveEPHClient
                         {
                             List<TwitterAccount> accounts = JsonConvert.DeserializeObject<List<TwitterAccount>>(device.TwitterAccount);
 
+                            //SendNotification("3392698503", $"{device.Alias}: {device.Message} @ksantacr_").GetAwaiter().GetResult();
+
                             foreach (TwitterAccount account in accounts)
                             {
-                                SendNotification(account.Id, $"{device.Alias}: {device.Message} \n@{account.Username}");
+                                SendNotification(account.Id, $"{device.Alias}: {device.Message} \n@{account.Username}").GetAwaiter().GetResult();
                             }
                         }
                         catch {
