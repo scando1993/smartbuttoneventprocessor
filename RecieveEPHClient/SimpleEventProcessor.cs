@@ -57,11 +57,15 @@ namespace RecieveEPHClient
                 if (sm != null)
                 {
 <<<<<<< HEAD
+<<<<<<< HEAD
                     UserDevices device = getDevice(sm.DeviceId);
 >>>>>>> Envio de notificacion con los datos configurados
 =======
                     var device = getDevice(sm.DeviceId);
 >>>>>>> tipo de dato dinamico
+=======
+                    UserDevices device = getDevice(sm.DeviceId);
+>>>>>>> tipo de dato UserDevices
                     if (device != null)
                     {
                         //Verificar que configuracion tiene
@@ -111,9 +115,11 @@ namespace RecieveEPHClient
                         {
                             List<TwitterAccount> accounts = JsonConvert.DeserializeObject<List<TwitterAccount>>(device.TwitterAccount);
 
+                            //SendNotification("3392698503", $"{device.Alias}: {device.Message} @ksantacr_").GetAwaiter().GetResult();
+
                             foreach (TwitterAccount account in accounts)
                             {
-                                SendNotification(account.Id, $"{device.Alias}: {device.Message} \n@{account.Username}");
+                                SendNotification(account.Id, $"{device.Alias}: {device.Message} \n@{account.Username}").GetAwaiter().GetResult();
                             }
                         }
                         catch {
