@@ -10,6 +10,8 @@ using RecieveEPHClient.Model;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
 
 namespace RecieveEPHClient
 {
@@ -43,36 +45,18 @@ namespace RecieveEPHClient
             {
                 //Logica de negocio
                 string data = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-                Console.WriteLine(data);
-
                 SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
                 if (sm != null)
                 {
-                    var device = getDevice(sm.DeviceId);
-=======
-                SmartButton sm = JsonConvert.DeserializeObject<SmartButton>(data);
-                if (sm != null)
-                {
-<<<<<<< HEAD
-<<<<<<< HEAD
                     UserDevices device = getDevice(sm.DeviceId);
->>>>>>> Envio de notificacion con los datos configurados
-=======
-                    var device = getDevice(sm.DeviceId);
->>>>>>> tipo de dato dinamico
-=======
-                    UserDevices device = getDevice(sm.DeviceId);
->>>>>>> tipo de dato UserDevices
+                    Console.WriteLine(data);
+
+                    //Envio de notificacion con los datos configurados
                     if (device != null)
                     {
                         //Verificar que configuracion tiene
                         device.Message = (string.IsNullOrWhiteSpace(device.Message)) ? "Boton presionado" : device.Message;
                         device.Alias = (string.IsNullOrWhiteSpace(device.Alias)) ? "" : device.Alias;
-
-<<<<<<< HEAD
                         //Enviar mensaje
                         sendMessage(sm, device);
 
@@ -90,27 +74,8 @@ namespace RecieveEPHClient
                             callWebhook(device.Webhook, btn);
                             Console.WriteLine($"Url {device.Webhook}");
                         }
-                    }
-                }
-                EventProcessor.events += 1;
-                Console.WriteLine($"Procesando. Particion: {context.PartitionId} {sm.Data} .Estado: {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
-=======
-                // TODO
-                // Consultar datos de la configuracion del boton
 
-                string userIdRC = "17747093";
-                string userIdKS = "3392698503";
-                string userIdJF = "1084864679757926401";
-
-                string temp = "Hola tu id de twitter es:";
-
-                SendNotification(userIdRC, $"{temp} {userIdRC}");
-                SendNotification(userIdKS, $"{temp} {userIdKS}");
-                SendNotification(userIdJF, $"{temp} {userIdJF}");
-=======
                         //Enviar Notificacion por Twitter
-
-                        //[{"Id":"1084864679757926400","Username":"JoseFlo07943435"},{"Id":"17747093","Username":"rt10runner"}, {"Id":"3392698503", "Username":"ksantacr_"}]
                         try
                         {
                             List<TwitterAccount> accounts = JsonConvert.DeserializeObject<List<TwitterAccount>>(device.TwitterAccount);
@@ -122,20 +87,20 @@ namespace RecieveEPHClient
                                 SendNotification(account.Id, $"{device.Alias}: {device.Message} \n@{account.Username}").GetAwaiter().GetResult();
                             }
                         }
-                        catch {
+                        catch
+                        {
                             Console.WriteLine($"No se han definido usuarios en el device: {device.DeviceId}");
                         }
-
                     }
                 }
->>>>>>> Envio de notificacion con los datos configurados
 
->>>>>>> envio de notificacion via twitter (datos quemados)
+                Console.WriteLine($"Procesando. Particion: {context.PartitionId} {sm.Data} .Estado: {sm.Status}, Id {sm.DeviceId}, lat: {sm.Latitude}, longitude: {sm.Longitude}");
+
+
             }
             return context.CheckpointAsync();
         }
 
-<<<<<<< HEAD
         private UserDevices getDevice(string Id)
         {
             db = new SmartButtonContext();
@@ -151,6 +116,11 @@ namespace RecieveEPHClient
             var response = client.PostAsync(url, stringContent);
         }
 
+        /// <summary>
+        /// Send SMS message Twilio via
+        /// </summary>
+        /// <param name="sm">SmartButton object</param>
+        /// <param name="device"></param>
         private void sendMessage(SmartButton sm, UserDevices device)
         {
             // Find your Account Sid and Token at twilio.com/console
@@ -178,9 +148,8 @@ namespace RecieveEPHClient
                 );
                 Console.WriteLine($"Mensaje {device.Message} para: {n}. Cod: {msg.Sid}. Dispositivo {device.DeviceId} con alias: {device.Alias}");
             }
-
         }
-=======
+
         /// <summary>
         /// Send notification twitter's via
         /// </summary>
@@ -190,23 +159,14 @@ namespace RecieveEPHClient
         private async Task<bool> SendNotification(string userId, string Message)
         {
             client = new HttpClient();
-
             string AuthHeader = ProjectComponent.GenerateTwitterAuthHeader(direct_messages_uri); client.DefaultRequestHeaders.Add("Authorization", AuthHeader); client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             string json = ProjectComponent.ParseJson(userId, Message);
             var response = client.PostAsync(direct_messages_uri, new StringContent(json, Encoding.UTF8, "application/json")).GetAwaiter().GetResult();
-            
+
             Console.WriteLine($"It was send: {response.IsSuccessStatusCode}, userId: {userId}, message: {Message}");
 
             return response.IsSuccessStatusCode;
-        }
-
-        private UserDevices getDevice(string Id)
-        {
-            db = new SmartButtonContext();
-            var button = db.UserDevices.Where(device => device.DeviceId == Id && device.Status == "CONFIGURED").FirstOrDefault();
-            db.Dispose();
-            return button;
         }
 
         private async Task<string> SendReplyResponse(string Text, string ReplyToStatusId, string ReplyToUserId)
@@ -265,7 +225,5 @@ namespace RecieveEPHClient
             return "OK";
 
         }
-
->>>>>>> envio de notificacion via twitter (datos quemados)
     }
 }
